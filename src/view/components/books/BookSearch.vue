@@ -1,24 +1,33 @@
 <script setup>
 import { ref } from 'vue'
-import {searchBooks} from "@/model/books.js";
+import { searchBooks } from '@/model/books.js'
 
 const searchQuery = ref('')
 const searchResults = ref([])
 const isLoading = ref(false)
+const hasSearched = ref(false)
 
 const performSearch = async () => {
-  if (!searchQuery.value.trim()) return
+  const query = searchQuery.value.trim()
+
+  if (!query) {
+    searchResults.value = []
+    hasSearched.value = false
+    return
+  }
 
   isLoading.value = true
+  hasSearched.value = true
+
   try {
-    searchResults.value = await searchBooks()
+    searchResults.value = await searchBooks(query)
   } catch (error) {
     console.error('Search failed:', error)
     searchResults.value = []
   } finally {
     isLoading.value = false
   }
-};
+}
 </script>
 
 <template>
@@ -63,7 +72,8 @@ const performSearch = async () => {
       </div>
     </div>
 
-    <div v-else-if="searchQuery" class="no-results">
+    <!-- Message 'No results' seulement après une vraie recherche -->
+    <div v-else-if="hasSearched" class="no-results">
       <p>No books found matching your search.</p>
     </div>
   </div>
