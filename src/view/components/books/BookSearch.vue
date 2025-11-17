@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from 'vue'
+import {searchBooks} from "@/model/books.js";
 
 const searchQuery = ref('')
 const searchResults = ref([])
@@ -10,30 +11,14 @@ const performSearch = async () => {
 
   isLoading.value = true
   try {
-    // Placeholder for actual OpenLibrary API search
-    // In a real implementation, you'd use axios or fetch to call the API
-    searchResults.value = [
-      // Mock data for demonstration
-      {
-        key: '/works/OL1234W',
-        title: 'Sample Book 1',
-        authors: ['John Doe'],
-        first_publish_year: 2020
-      },
-      {
-        key: '/works/OL5678W',
-        title: 'Sample Book 2',
-        authors: ['Jane Smith'],
-        first_publish_year: 2018
-      }
-    ]
+    searchResults.value = await searchBooks()
   } catch (error) {
     console.error('Search failed:', error)
     searchResults.value = []
   } finally {
     isLoading.value = false
   }
-}
+};
 </script>
 
 <template>
