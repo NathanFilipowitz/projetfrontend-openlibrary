@@ -1,17 +1,13 @@
 const BASE_URL = 'https://openlibrary.org';
-const params = new URLSearchParams();
-const headers = new Headers({
-    "User-Agent": "CPNV_projet_frontend/1.0 (py58wpb@eduvaud.ch)"
-}); //header required by OpenLibrary API so that requests are not blocked
 
 export async function searchBooks(query) {
     if (!query || !query.trim()) return []; // Avoid empty queries
     try {
+        const url = `${BASE_URL}/search.json?q=${encodeURIComponent(query)}&limit=10`
         const response = await fetch(
-            `${BASE_URL}/search.json?${new URLSearchParams(query)}&limit=10`,
+            url,
             {
-                method: 'GET',
-                headers: headers
+                method: 'GET'
             }
         )
         if (!response.ok) {
