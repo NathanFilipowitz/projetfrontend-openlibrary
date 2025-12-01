@@ -11,15 +11,10 @@ const routes = [
         path: '/books',
         name: 'Books',
         component: BookSearch // Renders BookSearch.vue for the /books path
-    },
-    // Add other routes here for the links in Navigation.vue
-    // { path: '/authors', name: 'Authors', component: Authors },
-    // { path: '/covers', name: 'Covers', component: Covers },
-    // { path: '/subjects', name: 'Subjects', component: Subjects },
+    }
 ]
 
 const router = createRouter({
-    // Use history mode for clean URLs (e.g., /books instead of /#/books)
     history: createWebHistory(),
     routes
 })
