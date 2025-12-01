@@ -1,0 +1,70 @@
+body {
+    font-family: Roboto, sans-serif;
+}
+
+.section-1 {
+    font-weight: 600;
+}
+
+.section-2 {
+    font-weight: 600;
+}
+
+.section-3 {
+    font-weight: 600;
+}
+
+.p-section-1{
+    font-weight: 400;
+    margin-top: 0;
+}
+
+.p-section-2{
+    font-weight: 400;
+    margin-top: 0;
+}
+
+.p-section-3{
+    font-weight: 400;
+    margin-top: 0;
+}
+
+.search-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.search-header {
+    margin-bottom: 20px;
+}
+
+.search-form {
+    display: flex;
+    gap: 10px;
+}
+
+.search-input {
+    flex-grow: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.search-button {
+    padding: 10px 15px;
+    background-color: #42b983;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.search-button:hover {
+    background-color: #3aa876;
+}
