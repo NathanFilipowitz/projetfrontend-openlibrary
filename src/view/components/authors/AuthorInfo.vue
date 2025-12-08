@@ -2,6 +2,7 @@
 import {ref, onMounted} from "vue";
 import { useRoute } from 'vue-router'
 import {searchAuthorWorks} from "@/model/authors.model.js";
+import {db} from '@/db/db.js'
 
 const route = useRoute()
 
@@ -9,11 +10,9 @@ const isLoading = ref(true)
 let authorResult = ref([])
 
 onMounted(async () => {
-    console.log(route.params.name);
     authorResult.value = await searchAuthorWorks(route.params.name);
 
     isLoading.value = false;
-    console.log(authorResult.value);
 })
 </script>
 
