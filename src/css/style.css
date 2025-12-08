@@ -68,3 +68,24 @@ body {
 .search-button:hover {
     background-color: #3aa876;
 }
+
+.author-info {
+    display: flex;
+    align-items: start;
+    padding: 15px;
+}
+.author-img {
+    width: 150px;
+    height: auto;
+    flex-shrink: 0;
+}
+.author-body {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    margin-left: 1vw;
+}
+.author-title {
+    margin-top: 0;
+}

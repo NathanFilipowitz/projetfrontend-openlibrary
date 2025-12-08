@@ -1,20 +1,20 @@
 const BASE_URL = 'https://openlibrary.org';
-const BASE_URL_COVER = 'https://covers.openlibrary.org';
+const BASE_URL_COVER = 'https://covers.openlibrary.org/b/id/';
+import axios from 'axios';
 
 export async function searchAuthors(query) {
     if (!query || !query.trim()) return []; // Avoid empty queries
     try {
+        let data = [];
         const url = `${BASE_URL}/search/authors.json?q=${encodeURIComponent(query)}&limit=10`
-        const response = await fetch(
-            url,
-            {
-                method: 'GET'
-            }
-        )
-        if (!response.ok) {
-            throw new Error(`API error: ${response.status}`);
-        }
-        const data = await response.json();
+        await axios({
+            method: 'get',
+            url: url,
+            responseType: 'json'
+        })
+        .then(function (response) {
+            data = response.data
+        });
 
         return data.docs.map(author => ({
             key: author.key,
@@ -32,17 +32,16 @@ export async function searchAuthors(query) {
 export async function searchAuthorWorks(name) {
     if (!name || !name.trim()) return []; // Avoid empty queries
     try {
-        const url = `${BASE_URL}/search.json?author=${encodeURIComponent(name)}&limit=10`
-        const response = await fetch(
-            url,
-            {
-                method: 'GET'
-            }
-        )
-        if (!response.ok) {
-            throw new Error(`API error: ${response.status}`);
-        }
-        const data = await response.json();
+        let data = [];
+        const url = `${BASE_URL}/search.json?author=${encodeURIComponent(name)}&limit=50`
+        await axios({
+            method: 'get',
+            url: url,
+            responseType: 'json'
+        })
+        .then(function (response) {
+            data = response.data
+        });
 
         return data.docs.map(author => ({
             names: author.names,

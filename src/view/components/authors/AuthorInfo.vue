@@ -1,79 +1,48 @@
 <script setup>
-import {ref} from "vue";
-import {searchBooks} from "@/model/books.js";
+import {ref, onMounted} from "vue";
+import { useRoute } from 'vue-router'
+import {searchAuthorWorks} from "@/model/authors.model.js";
 
-const searchQuery = ref('')
-const searchResults = ref([])
-const isLoading = ref(false)
-const hasSearched = ref(false)
+const route = useRoute()
 
-const performSearch = async () => {
-    const query = searchQuery.value.trim()
+const isLoading = ref(true)
+let authorResult = ref([])
 
-    if (!query) {
-        searchResults.value = []
-        hasSearched.value = false
-        return
-    }
+onMounted(async () => {
+    console.log(route.params.name);
+    authorResult.value = await searchAuthorWorks(route.params.name);
 
-    isLoading.value = true
-    hasSearched.value = true
-
-    try {
-        searchResults.value = await searchBooks(query)
-    } catch (error) {
-        console.error('Search failed:', error)
-        searchResults.value = []
-    } finally {
-        isLoading.value = false
-    }
-}
+    isLoading.value = false;
+    console.log(authorResult.value);
+})
 </script>
 
 <template>
     <div class="search-container">
-        <div class="search-header">
-            <h2>Book Search</h2>
-            <form @submit.prevent="performSearch" class="search-form">
-                <input
-                    v-model="searchQuery"
-                    type="text"
-                    placeholder="Search for books"
-                    class="search-input"
-                />
-                <button type="submit" class="search-button" :disabled="isLoading">
-                    {{ isLoading ? 'Searching...' : 'Search' }}
-                </button>
-            </form>
-        </div>
-
         <div v-if="isLoading" class="loading-spinner">
             <p>Loading results...</p>
         </div>
-
-        <div v-else-if="searchResults.length" class="search-results">
+        <div v-if="authorResult.length > 0" class="search-results">
             <div
-                v-for="book in searchResults"
-                :key="book.key"
+                v-for="work in authorResult"
+                :key="work.key"
                 class="book-result-card"
             >
-                <div class="book-info">
-                    <h3 v-for="author in searchResults"
-                        :key="author.key"
-                        class="book-result-card"> </h3>
-<!--                    <h3>{{ book.title }}</h3>-->
-                    <p class="book-authors">
-                        Authors: {{ book.authors.join(', ') }}
-                    </p>
-                    <p class="book-year">
-                        First Published: {{ book.first_publish_year }}
-                    </p>
+                <div class="author-info">
+                    <img class="author-img" v-if="work.cover_i !== undefined" :src="'https://covers.openlibrary.org/b/id/' + work.cover_i + '-M.jpg'" alt="{{work.cover_i}}">
+                    <div class="author-body">
+                        <h3 class="author-title">{{ work.title }}</h3>
+                        <p v-if="work.language !== undefined" class="author-lang">
+                            Language: {{ work.language[0] }}
+                        </p>
+                    </div>
                 </div>
+                <hr>
             </div>
         </div>
 
         <!-- Message 'No results' seulement après une vraie recherche -->
-        <div v-else-if="hasSearched" class="no-results">
+        <div v-else-if="authorResult.length <= 0 && isLoading === false" class="no-results">
             <p>No books found matching your search.</p>
         </div>
     </div>

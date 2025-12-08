@@ -74,10 +74,11 @@ const performSearch = async () => {
                     </div>
                 </div>
                 <div class="book-actions">
-                    <a v-bind:href="'/author/' + author.name">
+                    <a v-bind:href="'/authors/' + author.name">
                         <button class="details-button">View Details</button>
                     </a>
                 </div>
+                <hr>
             </div>
         </div>
 
