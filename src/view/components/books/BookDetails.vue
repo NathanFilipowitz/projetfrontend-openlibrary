@@ -27,6 +27,12 @@ onMounted(async () => {
   }
 })
 
+addToFavorite(async () =>{
+  try {
+
+  }
+})
+
 const bookDescription = computed(() => {
   if (!book.value || !book.value.description) return 'No description available.'
   return typeof book.value.description === 'string'
@@ -77,6 +83,7 @@ const goBack = () => router.back()
             <p>{{ bookDescription }}</p>
           </div>
           <div class="action-area">
+            <button @click="addToFavorite" class="favorite-btn">Favoris</button>
             <a :href="openLibraryLink" target="_blank" class="ol-button">
               View on OpenLibrary ↗
             </a>
@@ -117,6 +124,11 @@ const goBack = () => router.back()
   display: grid;
   grid-template-columns: 300px 1fr;
   gap: 40px;
+}
+
+.favorite-btn {
+  display: inline-block;
+  background-color: #42b983;
 }
 
 .large-cover {
