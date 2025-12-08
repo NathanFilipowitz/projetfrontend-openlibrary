@@ -1,6 +1,7 @@
 import axios from 'axios'
-
+import router from '../controller/router.js'
 const BASE_URL = 'https://openlibrary.org';
+
 
 export async function searchBooks(query) {
     if (!query || !query.trim()) return []; // Avoid empty queries
@@ -27,4 +28,12 @@ export async function searchBooks(query) {
         console.error('Failed to fetch books:', error);
         return [];
     }
+}
+
+export async function getBookDetails(id) {
+    const bookDetails = await fetch(`${BASE_URL}/works/${id}.json`);
+    if (!bookDetails.ok) {
+        throw new Error('Failed to fetch book details');
+    }
+    return await bookDetails.json();
 }

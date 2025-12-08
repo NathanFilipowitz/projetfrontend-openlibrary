@@ -1,11 +1,13 @@
 <script setup>
 import {ref} from 'vue'
+import { useRouter } from 'vue-router'
 import {searchBooks} from '@/model/books.js'
 
 const searchQuery = ref('')
 const searchResults = ref([])
 const isLoading = ref(false)
 const hasSearched = ref(false)
+const router = useRouter()
 
 const performSearch = async () => {
     const query = searchQuery.value.trim()
@@ -29,8 +31,10 @@ const performSearch = async () => {
     }
 }
 
-const showDetails = async () => {
-
+const showDetails = (book) => {
+    // The book key from the API starts with /works/, so we extract the ID.
+    const bookId = book.key.split('/').pop()
+    router.push({ name: 'BookDetails', params: { id: bookId } })
 }
 </script>
 
@@ -74,7 +78,7 @@ const showDetails = async () => {
                             First Published: {{ book.first_publish_year }}
                         </p>
                         <div class="book-actions">
-                            <button class="details-button" v-on:click="showDetails(book)">View Details</button>
+                            <button class="details-button" @click="showDetails(book)">View Details</button>
                         </div>
                     </div>
                 </div>
