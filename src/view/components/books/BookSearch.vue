@@ -1,11 +1,13 @@
 <script setup>
 import {ref} from 'vue'
+import { useRouter } from 'vue-router'
 import {searchBooks} from '@/model/books.js'
 
 const searchQuery = ref('')
 const searchResults = ref([])
 const isLoading = ref(false)
 const hasSearched = ref(false)
+const router = useRouter()
 
 const performSearch = async () => {
     const query = searchQuery.value.trim()
@@ -28,17 +30,23 @@ const performSearch = async () => {
         isLoading.value = false
     }
 }
+
+const showDetails = (book) => {
+    // The book key from the API starts with /works/, so we extract the ID.
+    const bookId = book.key.split('/').pop()
+    router.push({ name: 'BookDetails', params: { id: bookId } })
+}
 </script>
 
 <template>
-    <div class="search-container">
+    <div class="book-search-container">
         <div class="search-header">
-       <h2>Book Search</h2>
+            <h2>Book Search</h2>
             <form @submit.prevent="performSearch" class="search-form">
                 <input
                     v-model="searchQuery"
                     type="text"
-                    placeholder="Search for books"
+                    placeholder="Search for books, titles, or authors"
                     class="search-input"
                 />
                 <button type="submit" class="search-button" :disabled="isLoading">
@@ -58,16 +66,21 @@ const performSearch = async () => {
                 class="book-result-card"
             >
                 <div class="book-info">
-                    <h3>{{ book.title }}</h3>
-                    <p class="book-authors">
-                        Authors: {{ book.authors.join(', ') }}
-                    </p>
-                    <p class="book-year">
-                        First Published: {{ book.first_publish_year }}
-                    </p>
-                </div>
-                <div class="book-actions">
-                    <button class="details-button">View Details</button>
+                    <div class="book-item">
+                        <h3>{{ book.title }}</h3>
+                        <img :src="'https://covers.openlibrary.org/b/id/' + book.cover_image + '-M.jpg'">
+                    </div>
+                    <div class="book-item">
+                        <p class="book-authors">
+                            Authors: {{ book.authors.join(', ') }}
+                        </p>
+                        <p class="book-year">
+                            First Published: {{ book.first_publish_year }}
+                        </p>
+                        <div class="book-actions">
+                            <button class="details-button" @click="showDetails(book)">View Details</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -78,3 +91,50 @@ const performSearch = async () => {
         </div>
     </div>
 </template>
+
+<style scoped>
+.book-search-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.book-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+.search-header {
+    margin-bottom: 20px;
+}
+
+.search-form {
+    display: flex;
+    gap: 10px;
+}
+
+.search-input {
+    flex-grow: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.search-button {
+    padding: 10px 15px;
+    background-color: #42b983;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.search-button:hover {
+    background-color: #3aa876;
+}
+</style>
