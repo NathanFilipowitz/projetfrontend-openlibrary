@@ -91,7 +91,7 @@ const showDetails = (book) => {
         </div>
     </div>
 </template>
-
+// style made by gemini (AI)
 <style scoped>
 .book-search-container {
     max-width: 800px;
