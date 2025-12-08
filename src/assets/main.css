@@ -1,0 +1,26 @@
+/* Default styles (Mobile) */
+.content {
+    padding: 1rem;
+    background-color: #f0f8ff; /* AliceBlue */
+}
+
+.only-desktop {
+    display: none;
+}
+
+/* Tablet styles */
+@media (min-width: 756px) {
+    .content {
+        background-color: #f5f5dc; /* Beige */
+    }
+}
+
+/* Desktop styles */
+@media (min-width: 1024px) {
+    .content {
+        background-color: #e6e6fa; /* Lavender */
+    }
+    .only-desktop {
+        display: block;
+    }
+}

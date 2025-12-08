@@ -32,8 +32,8 @@ const performSearch = async () => {
 }
 
 const showDetails = (book) => {
-    // The book key from the API starts with /works/, so we extract the ID.
-    const bookId = book.key.split('/').pop()
+    // console.log('book received:',book,'book.key:',book.key, 'book.key.split(/):',book.key.split('/'), 'book.key.split(/).pop():',book.key.split('/').pop())
+    const bookId = book.key.split('/').pop() //separate the id from the rest of the key
     router.push({ name: 'BookDetails', params: { id: bookId } })
 }
 </script>
