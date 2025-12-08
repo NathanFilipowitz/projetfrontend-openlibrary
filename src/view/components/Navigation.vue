@@ -20,11 +20,6 @@ import {ref} from 'vue'
                 </router-link>
             </li>
             <li>
-                <router-link to="/covers" class="nav-link">
-                    <i class="icon-covers"></i> Covers
-                </router-link>
-            </li>
-            <li>
                 <router-link to="/subjects" class="nav-link">
                     <i class="icon-subjects"></i> Subjects
                 </router-link>
