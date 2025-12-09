@@ -2,12 +2,12 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getBookDetails } from '@/model/books.js'
-
+import { db } from '@/db/db.js'
 
 const route = useRoute() // get current route information.
 const router = useRouter()
 
-
+const FAVORITES_KEY = 'favoriteBooks'
 const book = ref(null)
 const isLoading = ref(true)
 const error = ref(null)
@@ -27,11 +27,28 @@ onMounted(async () => {
   }
 })
 
-addToFavorite(async () =>{
+const addToFavorite = async () => {
+    // checks if favorite is already in db and adds it if not
   try {
-
+    // get current favorites
+    console.log(bookId)
+    const existingFavorites = db.readDB(FAVORITES_KEY) || []
+    // add it if not already in favorites
+    console.log(existingFavorites)
+    if (!existingFavorites.includes(bookId)) {
+        const updatedFavorites = [...existingFavorites, bookId]
+        console.log(`bookId: ${bookId}, existingFavorites: ${existingFavorites}, Updated favorites: ${updatedFavorites}`)
+        // push updated list to db
+        db.writeDB(FAVORITES_KEY, updatedFavorites)
+        console.log(`Book ${bookId} added to favorites.`)
+    } else {
+        console.log(`Book ${bookId} is already in favorites.`)
+    }
+  } catch (err) {
+    error.value = 'Could not save favorite to the database.'
+    console.error('Failed to add to favorites:', err)
   }
-})
+}
 
 const bookDescription = computed(() => {
   if (!book.value || !book.value.description) return 'No description available.'
@@ -41,7 +58,7 @@ const bookDescription = computed(() => {
 })
 
 // create a direct link to the book on OpenLibrary
-const openLibraryLink = computed(() => `https://openlibrary.org/works/${bookId}`)
+const openLibraryLink = computed(() => `https://openlibrary.org${book.value?.key}`)
 
 const goBack = () => router.back()
 </script>
@@ -63,7 +80,7 @@ const goBack = () => router.back()
         <div class="image-column">
           <img
               v-if="book.covers && book.covers.length"
-              :src="`https://covers.openlibrary.org/b/id/${book.covers[0]}-L.jpg`"
+              :src="`https://covers.openlibrary.org/b/id/${book.covers[0]}-M.jpg`"
               alt="Book Cover"
               class="large-cover"
           />
