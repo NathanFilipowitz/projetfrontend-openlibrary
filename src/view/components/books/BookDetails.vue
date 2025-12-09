@@ -12,7 +12,7 @@ const book = ref(null)
 const isLoading = ref(true)
 const error = ref(null)
 
-// Get the book's ID from the URL
+// get bookId from url
 const bookId = route.params.id
 
 onMounted(async () => {
@@ -30,10 +30,8 @@ onMounted(async () => {
 const addToFavorite = async () => {
     // checks if favorite is already in db and adds it if not
   try {
-    // get current favorites
-    console.log(bookId)
     const existingFavorites = db.readDB(FAVORITES_KEY) || []
-    // add it if not already in favorites
+    // add bookId to favorites if not already in list
     console.log(existingFavorites)
     if (!existingFavorites.includes(bookId)) {
         const updatedFavorites = [...existingFavorites, bookId]
