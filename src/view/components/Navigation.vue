@@ -8,34 +8,38 @@ import {ref} from 'vue'
             <h1>OpenLibrary</h1>
             <p>Data Explorer</p>
         </div>
-        <ul class="nav-menu">
-            <li>
-                <router-link to="/books" class="nav-link">
-                    <i class="icon-books"></i> Books
-                </router-link>
-            </li>
-            <li>
-                <router-link to="/authors" class="nav-link">
-                    <i class="icon-authors"></i> Authors
-                </router-link>
-            </li>
-            <li>
-                <router-link to="/subjects" class="nav-link">
-                    <i class="icon-subjects"></i> Subjects
-                </router-link>
-            </li>
-        </ul>
+        <div class="routing">
+            <ul class="nav-menu">
+                <li>
+                    <router-link to="/books" class="nav-link">
+                        <i class="icon-books"></i> Books
+                    </router-link>
+                </li>
+                <li>
+                    <router-link to="/authors" class="nav-link">
+                        <i class="icon-authors"></i> Authors
+                    </router-link>
+                </li>
+                <li>
+                    <router-link to="/subjects" class="nav-link">
+                        <i class="icon-subjects"></i> Subjects
+                    </router-link>
+                </li>
+            </ul>
+        </div>
     </nav>
 </template>
 
 <style scoped>
 .sidebar {
-    width: 250px;
+    //width: 1%;
     background-color: #2c3e50;
     color: white;
     padding: 20px;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    justify-content: space-around;
+    margin: 1rem;
 }
 
 .logo {
@@ -70,5 +74,15 @@ import {ref} from 'vue'
 
 .icon-books, .icon-authors, .icon-covers, .icon-subjects {
     margin-right: 10px;
+}
+
+@media (min-width: 768px) {
+    .sidebar {
+        display: flex;
+        flex-direction: column; /* Side-by-side layout on larger screens */
+        justify-content: flex-start;
+        width: 240px;
+        margin: 0;
+    }
 }
 </style>
