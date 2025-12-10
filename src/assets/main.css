@@ -1,26 +1,21 @@
-/* Default styles (Mobile) */
-.content {
-    padding: 1rem;
-    background-color: #f0f8ff; /* AliceBlue */
+/* Define global CSS variables for consistent theming */
+:root {
+    --primary-color: #42b983;
+    --primary-color-hover: #3aa876;
+    --text-color-dark: #2c3e50;
+    --background-light: white;
+    --border-radius: 8px;
 }
 
-.only-desktop {
-    display: none;
-}
-
-/* Tablet styles */
-@media (min-width: 756px) {
-    .content {
-        background-color: #f5f5dc; /* Beige */
-    }
-}
-
-/* Desktop styles */
-@media (min-width: 1024px) {
-    .content {
-        background-color: #e6e6fa; /* Lavender */
-    }
-    .only-desktop {
-        display: block;
-    }
+/* A global, reusable button style */
+.btn {
+    display: inline-block;
+    background-color: var(--primary-color);
+    padding: 10px 18px;
+    border-radius: var(--border-radius);
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s ease;
+    color: white;
 }
