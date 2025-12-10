@@ -11,6 +11,7 @@ const FAVORITES_KEY = 'favoriteBooks'
 const book = ref(null)
 const isLoading = ref(true)
 const error = ref(null)
+const isFavorite = ref(false)
 
 // get bookId from url
 const bookId = route.params.id
@@ -18,6 +19,7 @@ const bookId = route.params.id
 onMounted(async () => {
   try {
     book.value = await getBookDetails(bookId)
+    checkIfFavorite() // Check favorite status on load
     console.log("Data returned from getBookDetails:", book.value)
   } catch (err) {
     error.value = "Could not load book details."
@@ -27,20 +29,30 @@ onMounted(async () => {
   }
 })
 
+const checkIfFavorite = () => {
+  const existingFavorites = db.readDB(FAVORITES_KEY) || []
+  isFavorite.value = existingFavorites.includes(bookId)
+}
+
 const addToFavorite = async () => {
     // checks if favorite is already in db and adds it if not
   try {
     const existingFavorites = db.readDB(FAVORITES_KEY) || []
+    const favIndex = existingFavorites.indexOf(bookId)
     // add bookId to favorites if not already in list
     console.log(existingFavorites)
     if (!existingFavorites.includes(bookId)) {
         const updatedFavorites = [...existingFavorites, bookId]
-        console.log(`bookId: ${bookId}, existingFavorites: ${existingFavorites}, Updated favorites: ${updatedFavorites}`)
+        console.log(`bookId: ${bookId}, existingFavorites: ${existingFavorites}, Updated favorites: ${updatedFavorites}, favIndex: ${favIndex}`)
         // push updated list to db
         db.writeDB(FAVORITES_KEY, updatedFavorites)
         console.log(`Book ${bookId} added to favorites.`)
+        isFavorite.value = true
     } else {
-        console.log(`Book ${bookId} is already in favorites.`)
+      // Remove from favorites using favorite position
+      existingFavorites.splice(favIndex, 1)
+      db.writeDB(FAVORITES_KEY, existingFavorites)
+      isFavorite.value = false
     }
   } catch (err) {
     error.value = 'Could not save favorite to the database.'
@@ -98,7 +110,9 @@ const goBack = () => router.back()
             <p>{{ bookDescription }}</p>
           </div>
           <div class="action-area">
-            <button @click="addToFavorite" class="favorite-btn">Favoris</button>
+            <button @click="addToFavorite" class="btn-icon favorite-btn" :class="{ 'is-favorite': isFavorite }" title="Add to favorites">
+              <span class="icon-heart">♥</span>
+            </button>
             <a :href="openLibraryLink" target="_blank" class="ol-button">
               View on OpenLibrary ↗
             </a>
@@ -108,134 +122,159 @@ const goBack = () => router.back()
     </div>
   </div>
 </template>
-//Style made by gemini (AI)
+
 <style scoped>
+/* --- Mobile First Styles (Default) --- */
 .details-container {
-  max-width: 900px;
-  margin: 40px auto;
-  padding: 30px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+  max-width: 100%; /* Use full width on mobile */
+  margin: 0 auto;
+  padding: 20px;
+  background: var(--background-light);
+  border-radius: var(--border-radius);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
   font-family: 'Segoe UI', sans-serif;
+  overflow-wrap: break-word; /* Prevents text overflow */
+  word-wrap: break-word;
 }
 
 .back-link {
   background: none;
   border: none;
-  color: #666;
+  color: #555;
   cursor: pointer;
   font-size: 0.9rem;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
   padding: 0;
+  display: inline-block;
 }
 
 .back-link:hover {
-  color: #42b983;
-  text-decoration: underline;
+  color: var(--primary-color);
 }
 
 .content-grid {
-  display: grid;
-  grid-template-columns: 300px 1fr;
-  gap: 40px;
-}
-
-.favorite-btn {
-  display: inline-block;
-  background-color: #42b983;
+  display: flex;
+  flex-direction: column; /* Stack image and info vertically */
+  gap: 25px;
 }
 
 .large-cover {
-  width: 100%;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  max-width: 200px; /* Constrain image size on mobile */
+  width: 50%;
+  height: auto;
+  display: block;
+  margin: 0 auto; /* Center the image */
+  border-radius: var(--border-radius);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
 .placeholder-cover {
-  width: 100%;
-  height: 400px;
+  max-width: 200px;
+  width: 50%;
+  height: 300px;
   background: #f0f0f0;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #888;
-  border-radius: 8px;
+  border-radius: var(--border-radius);
+  margin: 0 auto;
 }
 
 .info-column h1 {
   margin-top: 0;
-  font-size: 2.5rem;
-  color: #2c3e50;
+  font-size: 1.8rem; /* Smaller font size for mobile */
+  color: var(--text-color-dark);
   line-height: 1.2;
+  text-align: center; /* Center title on mobile */
 }
 
 .meta-tags {
-  margin: 15px 0;
+  margin: 10px 0;
   display: flex;
   gap: 10px;
+  justify-content: center; /* Center tags on mobile */
 }
 
 .tag {
   background: #eef2f5;
-  padding: 5px 12px;
+  padding: 4px 10px;
   border-radius: 20px;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: #555;
 }
 
 .description-box {
-  margin-top: 30px;
+  margin-top: 20px;
   line-height: 1.6;
   color: #444;
 }
 
+.action-area {
+  margin-top: 25px;
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  justify-content: center; /* Center actions on mobile */
+}
+
 .ol-button {
-  display: inline-block;
-  margin-top: 30px;
-  background-color: #42b983;
-  color: white;
-  padding: 12px 24px;
-  border-radius: 6px;
+  padding: 10px 20px;
   text-decoration: none;
-  font-weight: 600;
-  transition: background 0.2s;
+  font-size: 0.9rem;
 }
 
 .ol-button:hover {
-  background-color: #3aa876;
+  background-color: var(--primary-color-hover);
 }
 
-/* Loading/Error Styles */
-.state-message {
-  text-align: center;
-  padding: 50px;
-  color: #666;
-}
+/* --- Tablet Styles (min-width: 768px) --- */
+@media (min-width: 768px) {
+  .details-container {
+    padding: 30px;
+    overflow-wrap: break-word; /* Prevents text overflow */
+    word-wrap: break-word;
+  }
 
-.spinner {
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #42b983;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  animation: spin 1s linear infinite;
-  margin: 0 auto 20px;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-@media (max-width: 700px) {
   .content-grid {
-    grid-template-columns: 1fr;
+    display: grid;
+    grid-template-columns: 250px 1fr; /* Two-column grid layout */
+    gap: 30px;
   }
+
   .large-cover {
-    max-width: 200px;
-    margin: 0 auto;
-    display: block;
+    width: 100%;
+    max-width: none; /* Allow image to fill its column */
+    margin: 0;
   }
+
+  .info-column h1 {
+    font-size: 2.5rem; /* Larger font for desktop */
+    text-align: left; /* Align left on larger screens */
+  }
+
+  .meta-tags, .action-area {
+    justify-content: flex-start; /* Align left on larger screens */
+  }
+}
+
+/* --- Favorite Button Styles --- */
+.btn-icon {
+  background-color: #f0f0f0;
+  color: #888;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  padding: 0;
+  line-height: 1;
+}
+
+.btn-icon.is-favorite {
+  background-color: #fdeaea;
+  color: #e53e3e; /* Red for favorite */
 }
 </style>
