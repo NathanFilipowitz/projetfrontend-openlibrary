@@ -1,7 +1,6 @@
 <script setup>
 import {ref} from "vue";
-import {searchSubjects} from "@/model/subjects.js"; // I switched this to use the existing subjects.js for now
-
+import {searchSubjects} from "@/model/subjects.js";
 const searchQuery = ref('')
 const searchResults = ref([])
 const isLoading = ref(false)
@@ -20,7 +19,6 @@ const performSearch = async () => {
   hasSearched.value = true
 
   try {
-    // Assuming you meant to use searchSubjects or a similar function
     searchResults.value = await searchSubjects(query)
   } catch (error) {
     console.error('Search failed:', error)
@@ -68,7 +66,7 @@ const performSearch = async () => {
             First Published: {{ book.first_publish_year }}
           </p>
           <p class="book-subject">
-            subject: {{ book.subject }}
+            <span v-html="book.subject"></span>
           </p>
         </div>
       </div>

@@ -66,7 +66,7 @@ const performSearch = async () => {
             First Published: {{ book.first_publish_year }}
           </p>
           <p class="book-subject">
-            Subject: {{ book.subject }}
+            <span v-html="book.subject"></span>
           </p>
         </div>
         <div class="book-actions">
