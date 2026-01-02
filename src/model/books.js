@@ -1,28 +1,37 @@
 import axios from 'axios'
-import router from '../controller/router.js'
+import { buildFilterParams } from './filters.js'
 const BASE_URL = 'https://openlibrary.org';
+const API_HEADERS = {'User-Agent': 'OpenLibraryFrontEndProject/1.0 (py58wpb@eduvaud.ch)'};
 
+export async function searchBooks(query, filters = {}) {
+    if (!query || !query.trim()) return [];
 
-export async function searchBooks(query) {
-    if (!query || !query.trim()) return []; // Avoid empty queries
     try {
-        let data=[];
-        const url = `${BASE_URL}/search.json?q=${encodeURIComponent(query)}&limit=10`
+        let data = [];
+        // Construction de l'URL de base
+        let url = `${BASE_URL}/search.json?q=${encodeURIComponent(query)}`;
+
+        // Ajout des filtres grâce à la fonction importée
+        url += buildFilterParams(filters);
+
+        url += '&limit=20'; // Limite à 20 résultats
+
         await axios({
             method: 'get',
             url: url,
-            responseType: 'json'
+            responseType: 'json',
+            headers: API_HEADERS
         })
-        .then(function (response) {
-            data = response.data
-        });
+            .then(function (response) {
+                data = response.data
+            });
 
         return data.docs.map(book => ({
             key: book.key,
             title: book.title,
-            authors: book.author_name || [],
+            authors: book.author_name || ['Unknown Author'],
             first_publish_year: book.first_publish_year || 'Unknown',
-            cover_image: book.cover_i || 'Unknown'
+            cover_image: book.cover_i || null
         }));
     } catch (error) {
         console.error('Failed to fetch books:', error);
