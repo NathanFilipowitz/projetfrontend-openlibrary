@@ -2,8 +2,6 @@ import {createRouter, createWebHistory} from 'vue-router'
 import BookSearch from '@/view/components/books/BookSearch.vue'
 import BookAuthors from '@/view/components/authors/BookAuthors.vue'
 import AuthorInfo from '@/view/components/authors/AuthorInfo.vue'
-import BookSubjects from "@/view/components/subjects/BookSubjects.vue"
-import SubjectInfo from "@/view/components/subjects/SubjectInfo.vue";
 import BookDetails from "@/view/components/books/BookDetails.vue";
 
 const routes = [{
@@ -18,7 +16,7 @@ const routes = [{
 }, { path: '/authors', name: 'Authors', component: BookAuthors },
     { path: '/authors/about', name: 'Authors Info', component: AuthorInfo },
     // { path: '/covers', name: 'Covers', component: Covers },
-    { path: '/subjects', name: 'Subjects', component: BookSubjects },
+    // { path: '/subjects', name: 'Subjects', component: Subjects },
 ]
 
 
