@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { searchBooks } from '@/model/books.js'
 import { sortOptions, languageOptions } from '@/model/filters.js'
@@ -17,6 +17,54 @@ const showFilters = ref(false)
 const selectedSort = ref('')
 const selectedLanguage = ref('')
 
+// Propriété calculée pour filtrer et trier sans recharger l'API
+// On sépare le stockage (searchResults) de l'affichage (filteredBooks)
+const filteredBooks = computed(() => {
+  // On copie les résultats pour ne pas modifier l'original
+  let results = [...searchResults.value]
+
+  // Filtrage par langue
+  if (selectedLanguage.value) {
+    results = results.filter(book =>
+        // Vérifie si le livre possède la langue demandée
+        book.language && book.language.includes(selectedLanguage.value)
+    )
+  }
+
+  // Tri intelligent (Pertinence texte > Date)
+  if (selectedSort.value) {
+    const query = searchQuery.value.toLowerCase().trim()
+
+    // Aide IA: On trie d'abord si le titre contient la recherche, ensuite par date
+    results.sort((a, b) => {
+      // Priorité 1 : Le titre contient la recherche
+      const titleA = (a.title || '').toLowerCase()
+      const titleB = (b.title || '').toLowerCase()
+
+      const aHasQuery = titleA.includes(query)
+      const bHasQuery = titleB.includes(query)
+
+      // Si A contient le mot et B non, A passe devant (-1)
+      if (aHasQuery && !bHasQuery) return -1
+      // Si B contient le mot et A non, B passe devant (1)
+      if (!aHasQuery && bHasQuery) return 1
+
+      // Priorité 2 : La date (si les deux titres sont égaux en pertinence)
+      const yearA = parseInt(a.first_publish_year) || 0
+      const yearB = parseInt(b.first_publish_year) || 0
+
+      if (selectedSort.value === 'newest') {
+        return yearB - yearA // Descendant
+      } else if (selectedSort.value === 'oldest') {
+        return yearA - yearB // Ascendant
+      }
+      return 0
+    })
+  }
+
+  return results
+})
+
 const performSearch = async () => {
   const query = searchQuery.value.trim()
 
@@ -29,14 +77,13 @@ const performSearch = async () => {
   isLoading.value = true
   hasSearched.value = true
 
-  const filters = {
-    sort: selectedSort.value,
-    language: selectedLanguage.value
-  }
+  // On réinitialise les filtres visuels pour une nouvelle recherche
+  selectedSort.value = ''
+  selectedLanguage.value = ''
 
   try {
-    // On envoie les filtres à la fonction de recherche
-    searchResults.value = await searchBooks(query, filters)
+    // On charge les données brutes dans searchResults
+    searchResults.value = await searchBooks(query)
   } catch (error) {
     console.error('Search failed:', error)
     searchResults.value = []
@@ -88,16 +135,16 @@ const showDetails = (book) => {
         <div v-if="showFilters" class="filters-panel">
           <div class="filter-group">
             <label>Trier par :</label>
-            <select v-model="selectedSort" @change="performSearch">
-              <option v-for="opt in sortOptions" :key="opt.value" :value="opt.value">
-                {{ opt.label }}
-              </option>
+            <select v-model="selectedSort">
+              <option value="">Pertinence (Défaut)</option>
+              <option value="newest">Plus récents</option>
+              <option value="oldest">Plus anciens</option>
             </select>
           </div>
 
           <div class="filter-group">
             <label>Langue :</label>
-            <select v-model="selectedLanguage" @change="performSearch">
+            <select v-model="selectedLanguage">
               <option v-for="opt in languageOptions" :key="opt.value" :value="opt.value">
                 {{ opt.label }}
               </option>
@@ -111,9 +158,9 @@ const showDetails = (book) => {
       <p>Loading results...</p>
     </div>
 
-    <div v-else-if="searchResults.length" class="search-results">
+    <div v-else-if="filteredBooks.length" class="search-results">
       <div
-          v-for="book in searchResults"
+          v-for="book in filteredBooks"
           :key="book.key"
           class="book-result-card"
       >
@@ -124,7 +171,7 @@ const showDetails = (book) => {
             <div v-else class="no-cover">No Cover</div>
           </div>
           <div class="book-item">
-            <p class="book-authors">Authors: {{ book.authors.join(', ') }}</p>
+            <p class="book-authors">Authors: {{ book.authors ? book.authors.join(', ') : 'Unknown' }}</p>
             <p class="book-year">First Published: {{ book.first_publish_year }}</p>
             <div class="book-actions">
               <button class="details-button" @click="showDetails(book)">View Details</button>
@@ -135,7 +182,12 @@ const showDetails = (book) => {
     </div>
 
     <div v-else-if="hasSearched" class="no-results">
-      <p>No books found matching your search.</p>
+      <p v-if="searchResults.length > 0 && filteredBooks.length === 0">
+        Aucun résultat pour ces filtres.
+      </p>
+      <p v-else>
+        No books found matching your search.
+      </p>
     </div>
   </div>
 </template>
@@ -175,6 +227,7 @@ const showDetails = (book) => {
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.2s;
+  white-space: nowrap;
 }
 
 .filter-toggle-btn:hover {
@@ -201,6 +254,11 @@ const showDetails = (book) => {
   background-color: #3aa876;
 }
 
+.search-button:disabled {
+  background-color: #a8dcc5;
+  cursor: not-allowed;
+}
+
 /* Panneau des filtres */
 .filters-panel {
   background-color: #f8f9fa;
@@ -210,6 +268,7 @@ const showDetails = (book) => {
   display: flex;
   gap: 20px;
   animation: slideDown 0.3s ease-out;
+  margin-bottom: 20px;
 }
 
 .filter-group {
@@ -242,6 +301,10 @@ const showDetails = (book) => {
   border-bottom: 1px solid #eee;
 }
 
+.book-item h3 {
+  margin-top: 0;
+}
+
 .book-item img {
   max-width: 100%;
   border-radius: 4px;
@@ -255,6 +318,7 @@ const showDetails = (book) => {
   align-items: center;
   justify-content: center;
   color: #999;
+  border-radius: 4px;
 }
 
 .details-button {
@@ -265,6 +329,17 @@ const showDetails = (book) => {
   border-radius: 4px;
   cursor: pointer;
   margin-top: 10px;
+}
+
+.no-results {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+}
+
+.loading-spinner {
+  text-align: center;
+  padding: 20px;
 }
 
 /* Animation simple fais avec l'aide de l'ia */

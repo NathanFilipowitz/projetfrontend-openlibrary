@@ -1,21 +1,18 @@
 import axios from 'axios'
-import { buildFilterParams } from './filters.js'
+import router from '../controller/router.js'
 const BASE_URL = 'https://openlibrary.org';
-const API_HEADERS = {'User-Agent': 'OpenLibraryFrontEndProject/1.0 (py58wpb@eduvaud.ch)'};
 
-export async function searchBooks(query, filters = {}) {
-    if (!query || !query.trim()) return [];
+// add common 'User-Agent' header as requested by openlibrary API policies: https://openlibrary.org/developers/api
+const API_HEADERS = {
+    'User-Agent': 'OpenLibraryFrontEndProject/1.0 (py58wpb@eduvaud.ch)'
+};
 
+
+export async function searchBooks(query) {
+    if (!query || !query.trim()) return []; // Avoid empty queries
     try {
-        let data = [];
-        // Construction de l'URL de base
-        let url = `${BASE_URL}/search.json?q=${encodeURIComponent(query)}`;
-
-        // Ajout des filtres grâce à la fonction importée
-        url += buildFilterParams(filters);
-
-        url += '&limit=20'; // Limite à 20 résultats
-
+        let data=[];
+        const url = `${BASE_URL}/search.json?q=${encodeURIComponent(query)}&limit=10`
         await axios({
             method: 'get',
             url: url,
@@ -29,9 +26,9 @@ export async function searchBooks(query, filters = {}) {
         return data.docs.map(book => ({
             key: book.key,
             title: book.title,
-            authors: book.author_name || ['Unknown Author'],
+            authors: book.author_name || [],
             first_publish_year: book.first_publish_year || 'Unknown',
-            cover_image: book.cover_i || null
+            cover_image: book.cover_i || 'Unknown'
         }));
     } catch (error) {
         console.error('Failed to fetch books:', error);
@@ -40,7 +37,9 @@ export async function searchBooks(query, filters = {}) {
 }
 
 export async function getBookDetails(id) {
-    const bookDetails = await fetch(`${BASE_URL}/works/${id}.json`);
+    const bookDetails = await fetch(`${BASE_URL}/works/${id}.json`, {
+        headers: API_HEADERS
+    });
     if (!bookDetails.ok) {
         throw new Error('Failed to fetch book details');
     }
