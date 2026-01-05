@@ -182,7 +182,7 @@ const showDetails = (book) => {
 }
 
 .filter-toggle-btn.active {
-  background-color: #495057; /* Plus foncé quand actif */
+  background-color: #495057;
   box-shadow: inset 0 3px 5px rgba(0,0,0,0.125);
 }
 

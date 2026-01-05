@@ -17,8 +17,7 @@ export const languageOptions = [
 ];
 
 
-
-// Fonction qui transforme vos variables en paramètres d'URL
+// Fonction qui transforme les variables en paramètres
 export function buildFilterParams(filters) {
     let params = '';
     if (filters.language) params += `&language=${filters.language}`;
