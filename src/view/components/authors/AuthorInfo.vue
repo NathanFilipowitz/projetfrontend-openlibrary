@@ -1,80 +1,129 @@
+<!--Aide de l'article Medium pour pagination: https://medium.com/@obapelumi/pagination-with-vuejs-1f505ce8d15b-->
+
 <script setup>
-import {ref} from "vue";
-import {searchBooks} from "@/model/books.js";
+import {ref, onMounted, computed} from "vue";
+import { useRoute } from 'vue-router'
+import {authorModel} from "@/model/authors.model.js";
+import router from "@/controller/router.js";
 
-const searchQuery = ref('')
-const searchResults = ref([])
-const isLoading = ref(false)
-const hasSearched = ref(false)
+const route = useRoute()
 
-const performSearch = async () => {
-    const query = searchQuery.value.trim()
+const isLoading = ref(true)
+const authorWorks = ref([])
+const sortOrder = ref('asc')
 
-    if (!query) {
-        searchResults.value = []
-        hasSearched.value = false
-        return
-    }
+const pages = ref([])
+const page = ref(1)
+const perPage = ref(9)
 
-    isLoading.value = true
-    hasSearched.value = true
-
-    try {
-        searchResults.value = await searchBooks(query)
-    } catch (error) {
-        console.error('Search failed:', error)
-        searchResults.value = []
-    } finally {
-        isLoading.value = false
+function setPages () {
+    let numberOfPages = Math.ceil(authorWorks.value.length / perPage.value);
+    for (let index = 1; index <= numberOfPages; index++) {
+        pages.value.push(index);
     }
 }
+
+function paginate (posts) {
+    let from = (page.value * perPage.value) - perPage.value;
+    let to = (page.value * perPage.value);
+    return posts.slice(from, to);
+}
+
+const paginatedPosts = computed(() => {
+    return paginate(filteredWorks.value);
+})
+
+// Filtrage
+const filteredWorks = computed(() => {
+    // Aide IA: How to sort js array in js
+    const copiedData = [...authorWorks.value];
+
+    copiedData.sort((a, b) => {
+        const titleA = a.title.toUpperCase();
+        const titleB = b.title.toUpperCase();
+
+        if (titleA < titleB) {
+            return -1;
+        }
+        if (titleA > titleB) {
+            return 1;
+        }
+        return 0;
+    });
+
+    if (sortOrder.value === 'asc') {
+        return copiedData;
+    } else {
+        return copiedData.reverse();
+    }
+})
+
+const toggleSort = () => {
+    if (sortOrder.value === 'asc') {
+        sortOrder.value = 'desc';
+    } else {
+        sortOrder.value = 'asc';
+    }
+}
+
+const showDetails = (book) => {
+    const bookId = book.key.split('/').pop() //separate the id from the rest of the key
+    router.push({ name: 'BookDetails', params: { id: bookId } })
+}
+
+onMounted(async () => {
+    const authorKey = route.query.key;
+    authorWorks.value = await authorModel.searchAuthorWorks(authorKey);
+    console.log(authorWorks.value);
+    setPages()
+    isLoading.value = false;
+})
 </script>
 
 <template>
     <div class="search-container">
-        <div class="search-header">
-            <h2>Book Search</h2>
-            <form @submit.prevent="performSearch" class="search-form">
-                <input
-                    v-model="searchQuery"
-                    type="text"
-                    placeholder="Search for books"
-                    class="search-input"
-                />
-                <button type="submit" class="search-button" :disabled="isLoading">
-                    {{ isLoading ? 'Searching...' : 'Search' }}
-                </button>
-            </form>
-        </div>
-
+        <button
+            v-if="!isLoading && authorWorks.length > 0"
+            @click="toggleSort"
+            class="button"
+        >
+            Filtrage {{ sortOrder === 'asc' ? ' (A-Z)' : '(Z-A)' }}
+        </button>
         <div v-if="isLoading" class="loading-spinner">
             <p>Loading results...</p>
         </div>
 
-        <div v-else-if="searchResults.length" class="search-results">
+        <div v-else-if="paginatedPosts.length > 0" class="search-results">
             <div
-                v-for="book in searchResults"
-                :key="book.key"
+                v-for="work in paginatedPosts"
+                :key="work.key"
                 class="book-result-card"
             >
-                <div class="book-info">
-                    <h3 v-for="author in searchResults"
-                        :key="author.key"
-                        class="book-result-card"> </h3>
-<!--                    <h3>{{ book.title }}</h3>-->
-                    <p class="book-authors">
-                        Authors: {{ book.authors.join(', ') }}
-                    </p>
-                    <p class="book-year">
-                        First Published: {{ book.first_publish_year }}
-                    </p>
+                <div class="author-info">
+                    <div class="author-img-container">
+                        <img v-if="work.covers" class="author-img" :src="'https://covers.openlibrary.org/b/id/' + work.covers[0] + '-M.jpg'" alt="{{work.covers[0]}}">
+                        <img v-else class="author-img" src="@/assets/img/No_Image_Available.jpg" alt="No Image Available">
+                    </div>
+                    <div class="author-body">
+                        <h3 class="author-title">{{ work.title }}</h3>
+                    </div>
+                    <div class="book-actions">
+                        <button class="details-button" @click="showDetails(book)">View Details</button>
+                    </div>
                 </div>
+                <hr>
             </div>
         </div>
 
-        <!-- Message 'No results' seulement après une vraie recherche -->
-        <div v-else-if="hasSearched" class="no-results">
+        <div v-else-if="authorWorks.length <= 0 && isLoading === false" class="no-results">
             <p>No books found matching your search.</p>
+        </div>
+
+<!--        Pagination-->
+        <div v-if="pages.length > 1">
+            <button type="button" class="pagination" v-if="page !== 1" @click="page--"> << </button>
+            <button type="button" class="pagination" v-for="pageNumber in pages.slice(page - 1, page + 5)" @click="page = pageNumber"> {{pageNumber}} </button>
+            <button type="button" class="pagination" @click="page++" v-if="page < pages.length" > >> </button>
         </div>
     </div>
 </template>
