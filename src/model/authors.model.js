@@ -1,58 +1,50 @@
-const BASE_URL = 'https://openlibrary.org';
-const BASE_URL_COVER = 'https://covers.openlibrary.org/b/id/';
+const BASE_URL = '/api/openlibrary';
+const BASE_URL_WORKS = '/api/openlibrary/authors/';
+
 import axios from 'axios';
 
-export async function searchAuthors(query) {
-    if (!query || !query.trim()) return []; // Avoid empty queries
-    try {
-        let data = [];
-        const url = `${BASE_URL}/search/authors.json?q=${encodeURIComponent(query)}&limit=10`
-        await axios({
-            method: 'get',
-            url: url,
-            responseType: 'json'
-        })
-        .then(function (response) {
-            data = response.data
-        });
+export const authorModel = {
+    searchAuthors: async (query)=> {
+        if (!query) return [];
+        try {
+            const url = `${BASE_URL}/search/authors.json?q=${encodeURIComponent(query)}&limit=10`
+            const response = await axios({
+                method: 'get',
+                url: url,
+                responseType: 'json',
+            })
 
-        return data.docs.map(author => ({
-            key: author.key,
-            name: author.name,
-            top_subjects: author.top_subjects,
-            top_work: author.top_work,
-            work_count: author.work_count
-        }));
-    } catch (error) {
-        console.error('Failed to fetch authors:', error);
-        return [];
-    }
-}
+            return response.data.docs.map(author => ({
+                key: author.key,
+                name: author.name,
+                top_subjects: author.top_subjects,
+                top_work: author.top_work,
+                work_count: author.work_count
+            }));
+        } catch (error) {
+            console.error('Failed to fetch authors:', error);
+            return [];
+        }
+    },
 
-export async function searchAuthorWorks(name) {
-    if (!name || !name.trim()) return []; // Avoid empty queries
-    try {
-        let data = [];
-        const url = `${BASE_URL}/search.json?author=${encodeURIComponent(name)}&limit=50`
-        await axios({
-            method: 'get',
-            url: url,
-            responseType: 'json'
-        })
-        .then(function (response) {
-            data = response.data
-        });
+    searchAuthorWorks: async (id) => {
+        if (!id) return [];
+        try {
+            const url = `${BASE_URL_WORKS}${encodeURIComponent(id)}/works.json?limit=500`
+             const response = await axios({
+                method: 'get',
+                url: url,
+                responseType: 'json',
+            })
 
-        return data.docs.map(author => ({
-            names: author.names,
-            cover_i: author.cover_i,
-            title: author.title,
-            subtitle: author.subtitle,
-            year: author.year,
-            language: author.language
-        }));
-    } catch (error) {
-        console.error('Failed to fetch books:', error);
-        return [];
-    }
+            return response.data.entries.map(works => ({
+                covers: works.covers,
+                title: works.title,
+            }));
+        } catch (error) {
+            console.error('Failed to fetch books:', error);
+            return [];
+        }
+    },
+
 }
