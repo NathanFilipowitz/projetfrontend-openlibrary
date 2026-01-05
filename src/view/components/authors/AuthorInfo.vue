@@ -67,14 +67,13 @@ const toggleSort = () => {
 }
 
 const showDetails = (book) => {
-    const bookId = book.key.split('/').pop() //separate the id from the rest of the key
+    const bookId = book.replace("/works/", "");
     router.push({ name: 'BookDetails', params: { id: bookId } })
 }
 
 onMounted(async () => {
     const authorKey = route.query.key;
     authorWorks.value = await authorModel.searchAuthorWorks(authorKey);
-    console.log(authorWorks.value);
     setPages()
     isLoading.value = false;
 })
@@ -108,7 +107,7 @@ onMounted(async () => {
                         <h3 class="author-title">{{ work.title }}</h3>
                     </div>
                     <div class="book-actions">
-                        <button class="details-button" @click="showDetails(book)">View Details</button>
+                        <button class="details-button" @click="showDetails(work.id)">View Details</button>
                     </div>
                 </div>
                 <hr>

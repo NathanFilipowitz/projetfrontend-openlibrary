@@ -37,9 +37,8 @@ export const authorModel = {
                 responseType: 'json',
             })
 
-            console.log("response: ", response.data);
-
             return response.data.entries.map(works => ({
+                id: works.key,
                 covers: works.covers,
                 title: works.title,
             }));
