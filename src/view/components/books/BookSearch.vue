@@ -31,12 +31,6 @@ const performSearch = async () => {
     }
 }
 
-const showDetails = (book) => {
-    console.log("book:",book)
-    const bookId = book.key.split('/').pop() //separate the id from the rest of the key
-    console.log("bookId:",bookId)
-    router.push({ name: 'BookDetails', params: { id: bookId } })
-}
 </script>
 
 <template>
@@ -78,9 +72,10 @@ const showDetails = (book) => {
                         <p class="book-year">
                             First Published: {{ book.first_publish_year }}
                         </p>
-                        <div class="book-actions">
-                            <button class="details-button" @click="showDetails(book)">View Details</button>
-                        </div>
+                        {BASE_URL}/works/${id}.json
+                        <a class="book-actions" v-bind:href="'/books/about?name=' + author.name + '&key=' + author.key">
+                            <button class="details-button">More details about {{author.name}}</button>
+                        </a>
                     </div>
                 </div>
             </div>

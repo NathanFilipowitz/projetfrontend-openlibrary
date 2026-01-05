@@ -40,6 +40,7 @@ export async function getBookDetails(id) {
     const bookDetails = await fetch(`${BASE_URL}/works/${id}.json`, {
         headers: API_HEADERS
     });
+    console.log("bookDetails:",bookDetails)
     if (!bookDetails.ok) {
         throw new Error('Failed to fetch book details');
     }
