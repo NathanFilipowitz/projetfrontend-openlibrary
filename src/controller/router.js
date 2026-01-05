@@ -16,7 +16,7 @@ const routes = [{
     name: 'BookDetails',
     component: BookDetails
 }, { path: '/authors', name: 'Authors', component: BookAuthors },
-    { path: '/authors/about', name: 'Authors Info', component: AuthorInfo }
+    { path: '/authors/about', name: 'Authors Info', component: AuthorInfo },
     // { path: '/covers', name: 'Covers', component: Covers },
     { path: '/subjects', name: 'Subjects', component: BookSubjects },
 ]
