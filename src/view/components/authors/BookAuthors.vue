@@ -1,10 +1,41 @@
 <script setup>
 import {authorModel} from "@/model/authors.model.js";
-import {ref} from 'vue'
+import {computed, ref} from 'vue'
 
 const searchQuery = ref('')
 const searchResults = ref([])
 const isLoading = ref(false)
+// const showFilters = ref(true)
+// const sortOptions = ref([
+//     { value: 'asc', label: 'A-Z' },
+//     { value: 'desc', label: 'Z-A' },
+// ])
+// const selectedSort = ref('asc');
+//
+// // Filtrage
+// const filteredAuthors = computed(() => {
+//     // Aide IA: How to sort js array in js
+//     const copiedData = [...searchResults.value];
+//
+//     copiedData.sort((a, b) => {
+//         const titleA = a.title.toUpperCase();
+//         const titleB = b.title.toUpperCase();
+//
+//         if (titleA < titleB) {
+//             return -1;
+//         }
+//         if (titleA > titleB) {
+//             return 1;
+//         }
+//         return 0;
+//     });
+//
+//     if (selectedSort.value === 'asc') {
+//         return copiedData;
+//     } else {
+//         return copiedData.reverse();
+//     }
+// })
 
 const performSearch = async () => {
     const query = searchQuery.value.trim()
@@ -30,6 +61,16 @@ const performSearch = async () => {
 
 <template>
     <div class="search-container">
+<!--        <div v-if="showFilters" class="filters-panel">-->
+<!--            <div class="filter-group">-->
+<!--                <label>Trier par :</label>-->
+<!--                <select v-model="selectedSort" @change="filteredAuthors">-->
+<!--                    <option v-for="opt in sortOptions" :key="opt.value" :value="opt.value">-->
+<!--                        {{ opt.label }}-->
+<!--                    </option>-->
+<!--                </select>-->
+<!--            </div>-->
+<!--        </div>-->
         <div class="search-header">
             <h2>Author Search</h2>
             <form @submit.prevent="performSearch" class="search-form">

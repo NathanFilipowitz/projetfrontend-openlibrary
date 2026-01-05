@@ -4,6 +4,7 @@
 import {ref, onMounted, computed} from "vue";
 import { useRoute } from 'vue-router'
 import {authorModel} from "@/model/authors.model.js";
+import router from "@/controller/router.js";
 
 const route = useRoute()
 
@@ -34,7 +35,7 @@ const paginatedPosts = computed(() => {
 
 // Filtrage
 const filteredWorks = computed(() => {
-    // Aide IA: How to sort js array in vue.js
+    // Aide IA: How to sort js array in js
     const copiedData = [...authorWorks.value];
 
     copiedData.sort((a, b) => {
@@ -65,9 +66,15 @@ const toggleSort = () => {
     }
 }
 
+const showDetails = (book) => {
+    const bookId = book.key.split('/').pop() //separate the id from the rest of the key
+    router.push({ name: 'BookDetails', params: { id: bookId } })
+}
+
 onMounted(async () => {
     const authorKey = route.query.key;
     authorWorks.value = await authorModel.searchAuthorWorks(authorKey);
+    console.log(authorWorks.value);
     setPages()
     isLoading.value = false;
 })
@@ -100,6 +107,9 @@ onMounted(async () => {
                     <div class="author-body">
                         <h3 class="author-title">{{ work.title }}</h3>
                     </div>
+                    <div class="book-actions">
+                        <button class="details-button" @click="showDetails(book)">View Details</button>
+                    </div>
                 </div>
                 <hr>
             </div>
@@ -112,8 +122,8 @@ onMounted(async () => {
 <!--        Pagination-->
         <div v-if="pages.length > 1">
             <button type="button" class="pagination" v-if="page !== 1" @click="page--"> << </button>
-            <button type="button" class="pagination" v-for="pageNumber in pages.slice(page-1, page+5)" @click="page = pageNumber"> {{pageNumber}} </button>
-            <button type="button" @click="page++" v-if="page < pages.length" class="pagination"> >> </button>
+            <button type="button" class="pagination" v-for="pageNumber in pages.slice(page - 1, page + 5)" @click="page = pageNumber"> {{pageNumber}} </button>
+            <button type="button" class="pagination" @click="page++" v-if="page < pages.length" > >> </button>
         </div>
     </div>
 </template>
