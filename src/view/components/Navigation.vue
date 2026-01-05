@@ -32,14 +32,12 @@ import {ref} from 'vue'
 
 <style scoped>
 .sidebar {
-    //width: 1%;
+    width: 250px;
     background-color: #2c3e50;
     color: white;
     padding: 20px;
     display: flex;
-    flex-direction: row;
-    justify-content: space-around;
-    margin: 1rem;
+    flex-direction: column;
 }
 
 .logo {
@@ -74,15 +72,5 @@ import {ref} from 'vue'
 
 .icon-books, .icon-authors, .icon-covers, .icon-subjects {
     margin-right: 10px;
-}
-
-@media (min-width: 768px) {
-    .sidebar {
-        display: flex;
-        flex-direction: column; /* Side-by-side layout on larger screens */
-        justify-content: flex-start;
-        width: 240px;
-        margin: 0;
-    }
 }
 </style>
