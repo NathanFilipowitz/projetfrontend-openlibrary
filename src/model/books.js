@@ -19,9 +19,9 @@ export async function searchBooks(query) {
             responseType: 'json',
             headers: API_HEADERS
         })
-        .then(function (response) {
-            data = response.data
-        });
+            .then(function (response) {
+                data = response.data
+            });
 
         return data.docs.map(book => ({
             key: book.key,
