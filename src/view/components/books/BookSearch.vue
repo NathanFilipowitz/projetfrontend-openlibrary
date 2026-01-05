@@ -32,8 +32,9 @@ const performSearch = async () => {
 }
 
 const showDetails = (book) => {
-    // console.log('book received:',book,'book.key:',book.key, 'book.key.split(/):',book.key.split('/'), 'book.key.split(/).pop():',book.key.split('/').pop())
+    console.log("book:",book)
     const bookId = book.key.split('/').pop() //separate the id from the rest of the key
+    console.log("bookId:",bookId)
     router.push({ name: 'BookDetails', params: { id: bookId } })
 }
 </script>
@@ -85,7 +86,6 @@ const showDetails = (book) => {
             </div>
         </div>
 
-        <!-- Message 'No results' seulement après une vraie recherche -->
         <div v-else-if="hasSearched" class="no-results">
             <p>No books found matching your search.</p>
         </div>
