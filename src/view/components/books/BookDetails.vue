@@ -208,6 +208,7 @@ const goBack = () => router.back()
   margin-top: 20px;
   line-height: 1.6;
   color: #444;
+  overflow-wrap: break-word;
 }
 
 .action-area {
@@ -240,6 +241,10 @@ const goBack = () => router.back()
     display: grid;
     grid-template-columns: 250px 1fr; /* Two-column grid layout */
     gap: 30px;
+  }
+
+  .info-column {
+    min-width: 0; /* Prevents grid blowout when content is wide */
   }
 
   .large-cover {
