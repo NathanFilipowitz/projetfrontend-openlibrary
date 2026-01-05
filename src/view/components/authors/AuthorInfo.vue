@@ -1,48 +1,129 @@
+<!--Aide de l'article Medium pour pagination: https://medium.com/@obapelumi/pagination-with-vuejs-1f505ce8d15b-->
+
 <script setup>
-import {ref, onMounted} from "vue";
+import {ref, onMounted, computed} from "vue";
 import { useRoute } from 'vue-router'
-import {searchAuthorWorks} from "@/model/authors.model.js";
-import {db} from '@/db/db.js'
+import {authorModel} from "@/model/authors.model.js";
+import router from "@/controller/router.js";
 
 const route = useRoute()
 
 const isLoading = ref(true)
-let authorResult = ref([])
+const authorWorks = ref([])
+const sortOrder = ref('asc')
+
+const pages = ref([])
+const page = ref(1)
+const perPage = ref(9)
+
+function setPages () {
+    let numberOfPages = Math.ceil(authorWorks.value.length / perPage.value);
+    for (let index = 1; index <= numberOfPages; index++) {
+        pages.value.push(index);
+    }
+}
+
+function paginate (posts) {
+    let from = (page.value * perPage.value) - perPage.value;
+    let to = (page.value * perPage.value);
+    return posts.slice(from, to);
+}
+
+const paginatedPosts = computed(() => {
+    return paginate(filteredWorks.value);
+})
+
+// Filtrage
+const filteredWorks = computed(() => {
+    // Aide IA: How to sort js array in js
+    const copiedData = [...authorWorks.value];
+
+    copiedData.sort((a, b) => {
+        const titleA = a.title.toUpperCase();
+        const titleB = b.title.toUpperCase();
+
+        if (titleA < titleB) {
+            return -1;
+        }
+        if (titleA > titleB) {
+            return 1;
+        }
+        return 0;
+    });
+
+    if (sortOrder.value === 'asc') {
+        return copiedData;
+    } else {
+        return copiedData.reverse();
+    }
+})
+
+const toggleSort = () => {
+    if (sortOrder.value === 'asc') {
+        sortOrder.value = 'desc';
+    } else {
+        sortOrder.value = 'asc';
+    }
+}
+
+const showDetails = (book) => {
+    const bookId = book.key.split('/').pop() //separate the id from the rest of the key
+    router.push({ name: 'BookDetails', params: { id: bookId } })
+}
 
 onMounted(async () => {
-    authorResult.value = await searchAuthorWorks(route.params.name);
-
+    const authorKey = route.query.key;
+    authorWorks.value = await authorModel.searchAuthorWorks(authorKey);
+    console.log(authorWorks.value);
+    setPages()
     isLoading.value = false;
 })
 </script>
 
 <template>
     <div class="search-container">
+        <button
+            v-if="!isLoading && authorWorks.length > 0"
+            @click="toggleSort"
+            class="button"
+        >
+            Filtrage {{ sortOrder === 'asc' ? ' (A-Z)' : '(Z-A)' }}
+        </button>
         <div v-if="isLoading" class="loading-spinner">
             <p>Loading results...</p>
         </div>
-        <div v-if="authorResult.length > 0" class="search-results">
+
+        <div v-else-if="paginatedPosts.length > 0" class="search-results">
             <div
-                v-for="work in authorResult"
+                v-for="work in paginatedPosts"
                 :key="work.key"
                 class="book-result-card"
             >
                 <div class="author-info">
-                    <img class="author-img" v-if="work.cover_i !== undefined" :src="'https://covers.openlibrary.org/b/id/' + work.cover_i + '-M.jpg'" alt="{{work.cover_i}}">
+                    <div class="author-img-container">
+                        <img v-if="work.covers" class="author-img" :src="'https://covers.openlibrary.org/b/id/' + work.covers[0] + '-M.jpg'" alt="{{work.covers[0]}}">
+                        <img v-else class="author-img" src="@/assets/img/No_Image_Available.jpg" alt="No Image Available">
+                    </div>
                     <div class="author-body">
                         <h3 class="author-title">{{ work.title }}</h3>
-                        <p v-if="work.language !== undefined" class="author-lang">
-                            Language: {{ work.language[0] }}
-                        </p>
+                    </div>
+                    <div class="book-actions">
+                        <button class="details-button" @click="showDetails(book)">View Details</button>
                     </div>
                 </div>
                 <hr>
             </div>
         </div>
 
-        <!-- Message 'No results' seulement après une vraie recherche -->
-        <div v-else-if="authorResult.length <= 0 && isLoading === false" class="no-results">
+        <div v-else-if="authorWorks.length <= 0 && isLoading === false" class="no-results">
             <p>No books found matching your search.</p>
+        </div>
+
+<!--        Pagination-->
+        <div v-if="pages.length > 1">
+            <button type="button" class="pagination" v-if="page !== 1" @click="page--"> << </button>
+            <button type="button" class="pagination" v-for="pageNumber in pages.slice(page - 1, page + 5)" @click="page = pageNumber"> {{pageNumber}} </button>
+            <button type="button" class="pagination" @click="page++" v-if="page < pages.length" > >> </button>
         </div>
     </div>
 </template>

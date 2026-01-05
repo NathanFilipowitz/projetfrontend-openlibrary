@@ -1,27 +1,55 @@
 <script setup>
-import {searchAuthors} from "@/model/authors.model.js";
-import {ref} from 'vue'
+import {authorModel} from "@/model/authors.model.js";
+import {computed, ref} from 'vue'
 
 const searchQuery = ref('')
 const searchResults = ref([])
 const isLoading = ref(false)
-const hasSearched = ref(false)
+// const showFilters = ref(true)
+// const sortOptions = ref([
+//     { value: 'asc', label: 'A-Z' },
+//     { value: 'desc', label: 'Z-A' },
+// ])
+// const selectedSort = ref('asc');
+//
+// // Filtrage
+// const filteredAuthors = computed(() => {
+//     // Aide IA: How to sort js array in js
+//     const copiedData = [...searchResults.value];
+//
+//     copiedData.sort((a, b) => {
+//         const titleA = a.title.toUpperCase();
+//         const titleB = b.title.toUpperCase();
+//
+//         if (titleA < titleB) {
+//             return -1;
+//         }
+//         if (titleA > titleB) {
+//             return 1;
+//         }
+//         return 0;
+//     });
+//
+//     if (selectedSort.value === 'asc') {
+//         return copiedData;
+//     } else {
+//         return copiedData.reverse();
+//     }
+// })
 
 const performSearch = async () => {
     const query = searchQuery.value.trim()
 
     if (!query) {
         searchResults.value = []
-        hasSearched.value = false
         return
     }
 
     isLoading.value = true
-    hasSearched.value = true
 
     try {
-        searchResults.value = await searchAuthors(query)
-        console.log(searchResults.value)
+        searchResults.value = await authorModel.searchAuthors(query)
+        console.log('Search results:', searchResults.value);
     } catch (error) {
         console.error('Search failed:', error)
         searchResults.value = []
@@ -33,6 +61,16 @@ const performSearch = async () => {
 
 <template>
     <div class="search-container">
+<!--        <div v-if="showFilters" class="filters-panel">-->
+<!--            <div class="filter-group">-->
+<!--                <label>Trier par :</label>-->
+<!--                <select v-model="selectedSort" @change="filteredAuthors">-->
+<!--                    <option v-for="opt in sortOptions" :key="opt.value" :value="opt.value">-->
+<!--                        {{ opt.label }}-->
+<!--                    </option>-->
+<!--                </select>-->
+<!--            </div>-->
+<!--        </div>-->
         <div class="search-header">
             <h2>Author Search</h2>
             <form @submit.prevent="performSearch" class="search-form">
@@ -42,7 +80,7 @@ const performSearch = async () => {
                     placeholder="Search for authors"
                     class="search-input"
                 />
-                <button type="submit" class="search-button" :disabled="isLoading">
+                <button type="submit" class="button" :disabled="isLoading">
                     {{ isLoading ? 'Searching...' : 'Search' }}
                 </button>
             </form>
@@ -52,39 +90,38 @@ const performSearch = async () => {
             <p>Loading results...</p>
         </div>
 
-        <div v-else-if="searchResults.length" class="search-results">
+        <div v-else-if="searchResults.length > 0" class="search-results">
             <div
                 v-for="author in searchResults"
                 :key="author.key"
                 class="book-result-card"
             >
-                <div class="title">
+                <div v-if="author.work_count > 1" class="author-title">
                     <h3>{{ author.name }}</h3>
-                    <div class="section-1">
+                    <div class="author-subtitle">
                         Top subjects
-                        <p class="p-section-1">{{ author.top_subjects.join(', ') }}</p>
+                        <p v-if="author.top_subjects !== undefined">{{ author.top_subjects.join(', ') }}</p>
                     </div>
-                    <div class="section-2">
+                    <div class="author-subtitle">
                         Top work
-                        <p class="p-section-2">{{ author.top_work }}</p>
+                        <p>{{ author.top_work }}</p>
                     </div>
-                    <div class="section-3">
+                    <div class="author-subtitle">
                         Number of publications
-                        <p class="p-section-3">{{ author.work_count }}</p>
+                        <p>{{ author.work_count }}</p>
                     </div>
+                    <div class="book-actions">
+                        <a v-bind:href="'/authors/about?name=' + author.name + '&key=' + author.key">
+                            <button class="button">More details about {{author.name}}</button>
+                        </a>
+                    </div>
+                    <hr>
                 </div>
-                <div class="book-actions">
-                    <a v-bind:href="'/authors/' + author.name">
-                        <button class="details-button">View Details</button>
-                    </a>
-                </div>
-                <hr>
             </div>
         </div>
 
-        <!-- Message 'No results' seulement après une vraie recherche -->
-        <div v-else-if="hasSearched" class="no-results">
-            <p>No books found matching your search.</p>
+        <div v-else class="no-results">
+            <p>No authors found matching your search.</p>
         </div>
     </div>
 </template>

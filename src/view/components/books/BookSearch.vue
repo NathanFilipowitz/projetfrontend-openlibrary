@@ -98,8 +98,8 @@ const toggleFilters = () => {
 }
 
 const showDetails = (book) => {
-  const bookId = book.key.split('/').pop()
-  router.push({ name: 'BookDetails', params: { id: bookId } })
+    const bookId = book.key.split('/').pop() //separate the id from the rest of the key
+    router.push({ name: 'BookDetails', params: { id: bookId } })
 }
 </script>
 
@@ -191,7 +191,7 @@ const showDetails = (book) => {
     </div>
   </div>
 </template>
-
+// style made by gemini (AI)
 <style scoped>
 /* Conteneur principal */
 .book-search-container {
