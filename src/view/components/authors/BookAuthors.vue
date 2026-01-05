@@ -5,6 +5,7 @@ import {ref} from 'vue'
 const searchQuery = ref('')
 const searchResults = ref([])
 const isLoading = ref(false)
+const hasSearched = ref(false)
 
 const performSearch = async () => {
     const query = searchQuery.value.trim()
@@ -15,15 +16,21 @@ const performSearch = async () => {
     }
 
     isLoading.value = true
+    hasSearched.value = true
 
     try {
-        searchResults.value = await authorModel.searchAuthors(query)
-        console.log('Search results:', searchResults.value);
+        const results = await authorModel.searchAuthors(query)
+
+        for (let i = 0; i < results.length; i++) {
+            if (results[i].work_count > 1) {
+                searchResults.value.push(results[i]);
+
+            }
+        }
     } catch (error) {
-        console.error('Search failed:', error)
         searchResults.value = []
     } finally {
-        isLoading.value = false
+        isLoading.value = false;
     }
 }
 </script>
@@ -79,7 +86,7 @@ const performSearch = async () => {
             </div>
         </div>
 
-        <div v-else class="no-results">
+        <div v-else-if="searchResults.length === 0 && hasSearched === true" class="no-results">
             <p>No authors found matching your search.</p>
         </div>
     </div>
