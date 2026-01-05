@@ -1,11 +1,41 @@
 <script setup>
 import {authorModel} from "@/model/authors.model.js";
-import {ref} from 'vue'
+import {computed, ref} from 'vue'
 
 const searchQuery = ref('')
 const searchResults = ref([])
 const isLoading = ref(false)
-const hasSearched = ref(false)
+// const showFilters = ref(true)
+// const sortOptions = ref([
+//     { value: 'asc', label: 'A-Z' },
+//     { value: 'desc', label: 'Z-A' },
+// ])
+// const selectedSort = ref('asc');
+//
+// // Filtrage
+// const filteredAuthors = computed(() => {
+//     // Aide IA: How to sort js array in js
+//     const copiedData = [...searchResults.value];
+//
+//     copiedData.sort((a, b) => {
+//         const titleA = a.title.toUpperCase();
+//         const titleB = b.title.toUpperCase();
+//
+//         if (titleA < titleB) {
+//             return -1;
+//         }
+//         if (titleA > titleB) {
+//             return 1;
+//         }
+//         return 0;
+//     });
+//
+//     if (selectedSort.value === 'asc') {
+//         return copiedData;
+//     } else {
+//         return copiedData.reverse();
+//     }
+// })
 
 const performSearch = async () => {
     const query = searchQuery.value.trim()
@@ -16,27 +46,31 @@ const performSearch = async () => {
     }
 
     isLoading.value = true
-    hasSearched.value = true
 
     try {
-        const results = await authorModel.searchAuthors(query)
-
-        for (let i = 0; i < results.length; i++) {
-            if (results[i].work_count > 1) {
-                searchResults.value.push(results[i]);
-
-            }
-        }
+        searchResults.value = await authorModel.searchAuthors(query)
+        console.log('Search results:', searchResults.value);
     } catch (error) {
+        console.error('Search failed:', error)
         searchResults.value = []
     } finally {
-        isLoading.value = false;
+        isLoading.value = false
     }
 }
 </script>
 
 <template>
     <div class="search-container">
+<!--        <div v-if="showFilters" class="filters-panel">-->
+<!--            <div class="filter-group">-->
+<!--                <label>Trier par :</label>-->
+<!--                <select v-model="selectedSort" @change="filteredAuthors">-->
+<!--                    <option v-for="opt in sortOptions" :key="opt.value" :value="opt.value">-->
+<!--                        {{ opt.label }}-->
+<!--                    </option>-->
+<!--                </select>-->
+<!--            </div>-->
+<!--        </div>-->
         <div class="search-header">
             <h2>Author Search</h2>
             <form @submit.prevent="performSearch" class="search-form">
@@ -86,7 +120,7 @@ const performSearch = async () => {
             </div>
         </div>
 
-        <div v-else-if="searchResults.length === 0 && hasSearched === true" class="no-results">
+        <div v-else class="no-results">
             <p>No authors found matching your search.</p>
         </div>
     </div>
