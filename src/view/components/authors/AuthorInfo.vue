@@ -71,6 +71,8 @@ const showDetails = (book) => {
     router.push({ name: 'BookDetails', params: { id: bookId } })
 }
 
+const goBack = () => router.back()
+
 onMounted(async () => {
     const authorKey = route.query.key;
     authorWorks.value = await authorModel.searchAuthorWorks(authorKey);
@@ -81,6 +83,7 @@ onMounted(async () => {
 
 <template>
     <div class="search-container">
+        <button @click="goBack" class="back-link">← Back to Search</button>
         <button
             v-if="!isLoading && authorWorks.length > 0"
             @click="toggleSort"

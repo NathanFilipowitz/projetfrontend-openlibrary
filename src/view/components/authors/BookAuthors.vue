@@ -5,37 +5,7 @@ import {computed, ref} from 'vue'
 const searchQuery = ref('')
 const searchResults = ref([])
 const isLoading = ref(false)
-// const showFilters = ref(true)
-// const sortOptions = ref([
-//     { value: 'asc', label: 'A-Z' },
-//     { value: 'desc', label: 'Z-A' },
-// ])
-// const selectedSort = ref('asc');
-//
-// // Filtrage
-// const filteredAuthors = computed(() => {
-//     // Aide IA: How to sort js array in js
-//     const copiedData = [...searchResults.value];
-//
-//     copiedData.sort((a, b) => {
-//         const titleA = a.title.toUpperCase();
-//         const titleB = b.title.toUpperCase();
-//
-//         if (titleA < titleB) {
-//             return -1;
-//         }
-//         if (titleA > titleB) {
-//             return 1;
-//         }
-//         return 0;
-//     });
-//
-//     if (selectedSort.value === 'asc') {
-//         return copiedData;
-//     } else {
-//         return copiedData.reverse();
-//     }
-// })
+const hasSearched = ref(false)
 
 const performSearch = async () => {
     const query = searchQuery.value.trim()
@@ -46,9 +16,16 @@ const performSearch = async () => {
     }
 
     isLoading.value = true
+    hasSearched.value = true
 
     try {
-        searchResults.value = await authorModel.searchAuthors(query)
+        const results = await authorModel.searchAuthors(query)
+        for (let i = 0; i < results.length; i++) {
+            if (results[i].work_count > 1) {
+                searchResults.value.push(results[i])
+            }
+        }
+        // searchResults.value = await authorModel.searchAuthors(query)
         console.log('Search results:', searchResults.value);
     } catch (error) {
         console.error('Search failed:', error)
@@ -120,7 +97,7 @@ const performSearch = async () => {
             </div>
         </div>
 
-        <div v-else class="no-results">
+        <div v-else-if="searchResults.length === 0 && hasSearched === true" class="no-results">
             <p>No authors found matching your search.</p>
         </div>
     </div>
