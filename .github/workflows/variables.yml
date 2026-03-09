@@ -1,0 +1,14 @@
+name: Workflow .env
+
+on:
+  push:
+    branches: [main]
+jobs:
+  hides_env_elements:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Salutation personnalisée
+        run: echo "Bonjour $PRENOM, bienvenue dans le module ICT324"
+
+env:
+  PRENOM: "NathanF"
