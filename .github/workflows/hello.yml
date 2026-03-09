@@ -13,3 +13,4 @@ jobs:
       - name: Etape 2
         run: echo "Ceci est mon premier workflow automatisé."
       - name: Etape 3
+        run: echo "Workflow terminé avec succès! ✅"
