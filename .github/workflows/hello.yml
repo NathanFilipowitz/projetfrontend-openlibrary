@@ -1,4 +1,3 @@
-# Nom du workflow (apparaîtra dans l'onglet Actions de GitHub)
 name: Premier Workflow
 # Déclencheur : quand exécuter ce workflow ?
 # [push] signifie "à chaque push sur n'importe quelle branche"
