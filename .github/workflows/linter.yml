@@ -1,0 +1,26 @@
+name: Super-Linter
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  super-linter:
+    runs-on: ubuntu-latest
+    steps:
+      # Étape 1 : Récupérer le code
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      
+      # Étape 2 : Lancer Super-Linter
+      - name: Lancer Super-Linter
+        uses: super-linter/super-linter@v5
+        env:
+          # Active uniquement JavaScript/TypeScript
+          VALIDATE_JAVASCRIPT_ES: true
+          VALIDATE_JAVASCRIPT_STANDARD: true
+          DEFAULT_BRANCH: main
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
