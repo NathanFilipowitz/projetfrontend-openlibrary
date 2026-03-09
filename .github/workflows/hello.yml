@@ -1,7 +1,9 @@
 name: Premier Workflow
 # Déclencheur : quand exécuter ce workflow ?
 # [push] signifie "à chaque push sur n'importe quelle branche"
-on: [push]
+on:
+  push:
+    branches: [main]
   jobs:
     dire-bonjour:
       runs-on: ubuntu-latest
